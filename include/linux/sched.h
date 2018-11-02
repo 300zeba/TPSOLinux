@@ -128,7 +128,8 @@ struct task_group;
 	} while (0)
 
 #define set_current_state(state_value)				\
-	do {							\
+	do {	current->burst_time = current->utime - current->prev_cputime.utime;				\
+		printk(KERN_DEBUG "Cpu->burst_time de %d = %llu",current->prio,current->burst_time);			\
 		WARN_ON_ONCE(is_special_task_state(state_value));\
 		current->task_state_change = _THIS_IP_;		\
 		smp_store_mb(current->state, (state_value));	\
@@ -183,7 +184,8 @@ struct task_group;
  */
 #define __set_current_state(state_value)				\
 	do {								\
-		current->burst_time = 1;				\
+		current->burst_time = current->utime - current->prev_cputime.utime;				\
+		printk(KERN_DEBUG "Cpu->burst_time de %d = %llu",current->prio,current->burst_time);			\
 		current->state = (state_value);				\
 	} while (0)			
 	
@@ -603,7 +605,7 @@ struct task_struct {
 	struct thread_info		thread_info;
 #endif
 	/* Last CPU burst time */
-	int   				burst_time;
+	u64   				burst_time;
 	/* -1 unrunnable, 0 runnable, >0 stopped: */
 	volatile long			state;
 
