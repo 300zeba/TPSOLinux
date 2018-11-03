@@ -2165,6 +2165,7 @@ static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 	p->on_rq			= 0;
 	//Alteracao
 	p->last_utime       = 0;
+	p->last_utime2   	= 0;
 	//Fim
 	p->se.on_rq			= 0;
 	p->se.exec_start		= 0;
@@ -3440,12 +3441,10 @@ static void __sched notrace __schedule(bool preempt)
 	 */
 	rq_lock(rq, &rf);
 	smp_mb__after_spinlock();
-	
-	//ALTERACAO DO BURSTTIME
-	prev->burst_time = prev->utime - prev->last_utime;
-	prev->last_utime = prev->utime;
+	//Alteracao
+	prev->burst_time2 = prev->utime - prev->last_utime2;
+	prev->last_utime2 = prev->utime;
 	//Fim
-	
 	/* Promote REQ to ACT */
 	rq->clock_update_flags <<= 1;
 	update_rq_clock(rq);
@@ -3501,6 +3500,11 @@ static void __sched notrace __schedule(bool preempt)
 		 *   is a RELEASE barrier),
 		 */
 		++*switch_count;
+		
+		//ALTERACAO DO BURSTTIME
+		prev->burst_time = prev->utime - prev->last_utime;
+		prev->last_utime = prev->utime;
+		//Fim
 
 		trace_sched_switch(preempt, prev, next);
 
