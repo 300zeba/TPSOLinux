@@ -1,3 +1,4 @@
+
 /* SPDX-License-Identifier: GPL-2.0 */
 #ifndef _LINUX_SCHED_H
 #define _LINUX_SCHED_H
@@ -127,11 +128,10 @@ struct task_group;
 		current->state = (state_value);			\
 	} while (0)
 
-#define set_current_state(state_value)				\
-	do {	current->burst_time = current->utime - current->prev_cputime.utime;				\
-		printk(KERN_DEBUG "Cpu->burst_time de %d = %llu",current->prio,current->burst_time);			\
+#define set_current_state(state_value)					\
+	do {												\
 		WARN_ON_ONCE(is_special_task_state(state_value));\
-		current->task_state_change = _THIS_IP_;		\
+		current->task_state_change = _THIS_IP_;			\
 		smp_store_mb(current->state, (state_value));	\
 	} while (0)
 
@@ -182,10 +182,8 @@ struct task_group;
  *
  * Also see the comments of try_to_wake_up().
  */
-#define __set_current_state(state_value)				\
-	do {								\
-		current->burst_time = current->utime - current->prev_cputime.utime;				\
-		printk(KERN_DEBUG "Cpu->burst_time de %d = %llu",current->prio,current->burst_time);			\
+#define __set_current_state(state_value)			\
+	do {											\
 		current->state = (state_value);				\
 	} while (0)			
 	
@@ -606,6 +604,7 @@ struct task_struct {
 #endif
 	/* Last CPU burst time */
 	u64   				burst_time;
+	u64					last_utime;
 	/* -1 unrunnable, 0 runnable, >0 stopped: */
 	volatile long			state;
 
