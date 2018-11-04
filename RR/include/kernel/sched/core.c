@@ -2332,10 +2332,10 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 */
 	 //Alteracao RR
 	//p->prio = current->normal_prio;
-	p->prio = MAX_RT_PRIO - 1;
-	p->normal_prio = MAX_RT_PRIO - 1;
-	p->static_prio = MAX_RT_PRIO - 1;
 	p->rt_priority = MAX_RT_PRIO - 1;
+	p->prio = 0;
+	p->normal_prio = 0;
+	p->static_prio = 0;
 	/*
 	 * Revert to default priority/policy on fork if requested.
 	 */
