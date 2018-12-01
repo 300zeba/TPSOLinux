@@ -4205,7 +4205,7 @@ static void put_prev_entity(struct cfs_rq *cfs_rq, struct sched_entity *prev)
 	/* throttle cfs_rqs exceeding runtime */
 	check_cfs_rq_runtime(cfs_rq);
 
-	check_spread(cfs_rq, prev);
+	//check_spread(cfs_rq, prev); //Retirado
 
 	if (prev->on_rq) {
 		update_stats_wait_start(cfs_rq, prev);
@@ -6465,21 +6465,25 @@ static void migrate_task_rq_fair(struct task_struct *p, int new_cpu)
 	if (p->state == TASK_WAKING) {
 		struct sched_entity *se = &p->se;
 		struct cfs_rq *cfs_rq = cfs_rq_of(se);
-		u64 min_vruntime;
+		//u64 min_vruntime; //Retirado
+		u64 min_burst_time;
 
 #ifndef CONFIG_64BIT
-		u64 min_vruntime_copy;
+		//u64 min_vruntime_copy;
+		u64 min_burst_time_copy;
 
 		do {
-			min_vruntime_copy = cfs_rq->min_vruntime_copy;
+			//min_vruntime_copy = cfs_rq->min_vruntime_copy;
+			min_burst_time_copy = cfs_rq->min_burst_time_copy;
 			smp_rmb();
-			min_vruntime = cfs_rq->min_vruntime;
-		} while (min_vruntime != min_vruntime_copy);
+		//	min_vruntime = cfs_rq->min_vruntime;
+			min_burst_time = cfs_rq->min_burst_time;
+		} while (min_burst_time != min_burst_time_copy); //Alterado
 #else
-		min_vruntime = cfs_rq->min_vruntime;
+		min_burst_time = cfs_rq->min_burst_time; //Alterado
 #endif
 
-		se->vruntime -= min_vruntime;
+		se->burst_time -= min_burst_time; //Alterado
 	}
 
 	if (p->on_rq == TASK_ON_RQ_MIGRATING) {
@@ -6554,7 +6558,8 @@ static unsigned long wakeup_gran(struct sched_entity *se)
 static int
 wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se)
 {
-	s64 gran, vdiff = curr->vruntime - se->vruntime;
+	//s64 gran, vdiff = curr->vruntime - se->vruntime; //Retirado
+	s64 gran, vdiff = curr->burst_time - se->burst_time;
 
 	if (vdiff <= 0)
 		return -1;
