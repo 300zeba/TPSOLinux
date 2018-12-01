@@ -870,9 +870,9 @@ static void update_curr(struct cfs_rq *cfs_rq)
 	curr->sum_exec_runtime += delta_exec;
 	schedstat_add(cfs_rq->exec_clock, delta_exec);
 
-	curr->vruntime += calc_delta_fair(delta_exec, curr);
-	update_min_vruntime(cfs_rq);
-	
+	//curr->vruntime += calc_delta_fair(delta_exec, curr); //Retirado
+	//update_min_vruntime(cfs_rq); //Retirado
+
 	curr->burst_time = task_of(curr)->burst_time;
 	update_min_burst_time(cfs_rq);
 
@@ -884,7 +884,7 @@ static void update_curr(struct cfs_rq *cfs_rq)
 		account_group_exec_runtime(curtask, delta_exec);
 	}
 
-	account_cfs_rq_runtime(cfs_rq, delta_exec);
+	//account_cfs_rq_runtime(cfs_rq, delta_exec); //Retirado
 }
 
 static void update_curr_fair(struct rq *rq)
@@ -3824,33 +3824,33 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 static void
 place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial)
 {
-	u64 vruntime = cfs_rq->min_vruntime;
-
+	//u64 vruntime = cfs_rq->min_vruntime; //Retirado
+	u64 burst_time = cfs_rq->min_burst_time;
 	/*
 	 * The 'current' period is already promised to the current tasks,
 	 * however the extra weight of the new task will slow them down a
 	 * little, place the new task so that it fits in the slot that
 	 * stays open at the end.
 	 */
-	if (initial && sched_feat(START_DEBIT))
-		vruntime += sched_vslice(cfs_rq, se);
+	//if (initial && sched_feat(START_DEBIT)) //Retirado
+	//	vruntime += sched_vslice(cfs_rq, se); //Retirado
 
 	/* sleeps up to a single latency don't count. */
+	/*
 	if (!initial) {
 		unsigned long thresh = sysctl_sched_latency;
 
-		/*
-		 * Halve their sleep time's effect, to allow
-		 * for a gentler effect of sleepers:
-		 */
+
 		if (sched_feat(GENTLE_FAIR_SLEEPERS))
 			thresh >>= 1;
 
 		vruntime -= thresh;
 	}
+	*/
 
 	/* ensure we never gain time by being placed backwards. */
-	se->vruntime = max_vruntime(se->vruntime, vruntime);
+	//se->vruntime = max_vruntime(se->vruntime, vruntime); //Retirado
+	se->burst_time = max_burst_time(se->burst_time, burst_time);
 }
 
 static void check_enqueue_throttle(struct cfs_rq *cfs_rq);
@@ -3916,8 +3916,8 @@ enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 * If we're the current task, we must renormalise before calling
 	 * update_curr().
 	 */
-	if (renorm && curr)
-		se->vruntime += cfs_rq->min_vruntime;
+	//if (renorm && curr) //Retirado
+	//	se->vruntime += cfs_rq->min_vruntime; //Retirado
 
 	update_curr(cfs_rq);
 
@@ -3927,8 +3927,8 @@ enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 * placed in the past could significantly boost this task to the
 	 * fairness detriment of existing tasks.
 	 */
-	if (renorm && !curr)
-		se->vruntime += cfs_rq->min_vruntime;
+//	if (renorm && !curr) //Retirado
+//		se->vruntime += cfs_rq->min_vruntime; //Retirado
 
 	/*
 	 * When enqueuing a sched_entity, we must:
@@ -3939,7 +3939,7 @@ enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 *   - Add its new weight to cfs_rq->load.weight
 	 */
 	update_load_avg(cfs_rq, se, UPDATE_TG | DO_ATTACH);
-	update_cfs_group(se);
+	update_cfs_group(se); //Retirar
 	enqueue_runnable_load_avg(cfs_rq, se);
 	account_entity_enqueue(cfs_rq, se);
 
@@ -3948,7 +3948,7 @@ enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 
 	check_schedstat_required();
 	update_stats_enqueue(cfs_rq, se, flags);
-	check_spread(cfs_rq, se);
+	//check_spread(cfs_rq, se); //Retirado?
 	if (!curr)
 		__enqueue_entity(cfs_rq, se);
 	se->on_rq = 1;
@@ -4040,8 +4040,8 @@ dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 * update_min_vruntime() again, which will discount @se's position and
 	 * can move min_vruntime forward still more.
 	 */
-	if (!(flags & DEQUEUE_SLEEP))
-		se->vruntime -= cfs_rq->min_vruntime;
+	//if (!(flags & DEQUEUE_SLEEP)) //Retirado
+	//	se->vruntime -= cfs_rq->min_vruntime; //Retirado
 
 	/* return excess runtime on last dequeue */
 	return_cfs_rq_runtime(cfs_rq);
@@ -4055,7 +4055,7 @@ dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 * further than we started -- ie. we'll be penalized.
 	 */
 	if ((flags & (DEQUEUE_SAVE | DEQUEUE_MOVE)) != DEQUEUE_SAVE)
-		update_min_vruntime(cfs_rq);
+		update_min_burst_time(cfs_rq);
 }
 
 /*
@@ -5140,14 +5140,14 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	 * Let's add the task's estimated utilization to the cfs_rq's
 	 * estimated utilization, before we update schedutil.
 	 */
-	util_est_enqueue(&rq->cfs, p); //Retirar ?
+	util_est_enqueue(&rq->cfs, p);
 
 	/*
 	 * If in_iowait is set, the code below may not trigger any cpufreq
 	 * utilization updates, so do it here explicitly with the IOWAIT flag
 	 * passed.
 	 */
-	if (p->in_iowait) //Retirar ?
+	if (p->in_iowait)
 		cpufreq_update_util(rq, SCHED_CPUFREQ_IOWAIT);
 
 	for_each_sched_entity(se) {
@@ -5176,14 +5176,14 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		if (cfs_rq_throttled(cfs_rq))
 			break;
 
-		update_load_avg(cfs_rq, se, UPDATE_TG);//Retirar ?
+		update_load_avg(cfs_rq, se, UPDATE_TG);
 		update_cfs_group(se);
 	}
 
 	if (!se)
 		add_nr_running(rq, 1);
 
-	hrtick_update(rq);
+	hrtick_update(rq); //Preemption
 }
 
 static void set_next_buddy(struct sched_entity *se);
