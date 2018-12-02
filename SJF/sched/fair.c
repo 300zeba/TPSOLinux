@@ -4089,13 +4089,13 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 		return;
 
 	se = __pick_first_entity(cfs_rq);
-	delta = curr->vruntime - se->vruntime;
-
+	//delta = curr->vruntime - se->vruntime; //Retirado
+	delta = curr->burst_time - se->burst_time;
 	if (delta < 0)
 		return;
 
-	if (delta > ideal_runtime)
-		resched_curr(rq_of(cfs_rq));
+	//if (delta > ideal_runtime)
+		//resched_curr(rq_of(cfs_rq));
 }
 
 static void
@@ -9771,7 +9771,8 @@ static void task_fork_fair(struct task_struct *p)
 	curr = cfs_rq->curr;
 	if (curr) {
 		update_curr(cfs_rq);
-		se->vruntime = curr->vruntime;
+		//se->vruntime = curr->vruntime; //Retirado
+		se->burst_time = curr->burst_time;
 	}
 	place_entity(cfs_rq, se, 1);
 
@@ -9780,11 +9781,13 @@ static void task_fork_fair(struct task_struct *p)
 		 * Upon rescheduling, sched_class::put_prev_task() will place
 		 * 'current' within the tree based on its new key value.
 		 */
-		swap(curr->vruntime, se->vruntime);
+		//swap(curr->vruntime, se->vruntime); //Retirado
+		swap(curr->burst_time, se->burst_time);
 		resched_curr(rq);
 	}
 
-	se->vruntime -= cfs_rq->min_vruntime;
+	//se->vruntime -= cfs_rq->min_vruntime; //Retirado
+	se->burst_time -= cfs_rq->min_burst_time;
 	rq_unlock(rq, &rf);
 }
 
@@ -9898,13 +9901,14 @@ static void detach_task_cfs_rq(struct task_struct *p)
 	struct sched_entity *se = &p->se;
 	struct cfs_rq *cfs_rq = cfs_rq_of(se);
 
-	if (!vruntime_normalized(p)) {
+	if (!vruntime_normalized(p)) { //Nao precisa retirar
 		/*
 		 * Fix up our vruntime so that the current sleep doesn't
 		 * cause 'unlimited' sleep bonus.
 		 */
 		place_entity(cfs_rq, se, 0);
-		se->vruntime -= cfs_rq->min_vruntime;
+		//se->vruntime -= cfs_rq->min_vruntime; //Retirado
+		se->burst_time -= cfs_rq->min_burst_time;
 	}
 
 	detach_entity_cfs_rq(se);
