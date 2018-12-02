@@ -498,6 +498,9 @@ static inline u64 max_burst_time(u64 max_burst_time, u64 burst_time)
 
 static inline u64 min_burst_time(u64 min_burst_time, u64 burst_time)
 {
+	if(min_burst_time == 0){
+		return (u64)100*(-(1LL << 20));
+	}
 	s64 delta = (s64)(burst_time - min_burst_time);
 	if (delta < 0)
 		min_burst_time = burst_time;
@@ -875,6 +878,7 @@ static void update_curr(struct cfs_rq *cfs_rq)//Importantao
 
 	curr->burst_time = task_of(curr)->burst_time;
 	update_min_burst_time(cfs_rq);
+
 
 	if (entity_is_task(curr)) {
 		struct task_struct *curtask = task_of(curr);
@@ -3916,8 +3920,9 @@ enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 * If we're the current task, we must renormalise before calling
 	 * update_curr().
 	 */
-	//if (renorm && curr) //Retirado
-	//	se->vruntime += cfs_rq->min_vruntime; //Retirado
+	if (renorm && curr)
+		se->burst_time += cfs_rq->min_burst_time;
+			//	se->vruntime += cfs_rq->min_vruntime; //Retirado
 
 	update_curr(cfs_rq);
 
@@ -6722,6 +6727,7 @@ again:
 		 * forget we've ever seen it.
 		 */
 		if (curr) {
+			//printk
 			if (curr->on_rq)
 				update_curr(cfs_rq);
 			else
@@ -6770,7 +6776,7 @@ again:
 				se = parent_entity(se);
 			}
 		}
-
+//printk
 		put_prev_entity(cfs_rq, pse);
 		set_next_entity(cfs_rq, se);
 	}
@@ -9971,7 +9977,7 @@ void init_cfs_rq(struct cfs_rq *cfs_rq)
 {
 	cfs_rq->tasks_timeline = RB_ROOT_CACHED;
 		//cfs_rq->min_vruntime = (u64)(-(1LL << 20)); //Retirado
-		cfs_rq->min_burst_time = (u64)(-(1LL << 20));
+		cfs_rq->min_burst_time = (u64)100*(-(1LL << 20));
 #ifndef CONFIG_64BIT
 	//cfs_rq->min_vruntime_copy = cfs_rq->min_vruntime; //Retirado
 	cfs_rq->min_burst_time_copy = cfs_rq->min_burst_time;
