@@ -879,7 +879,7 @@ static void update_curr(struct cfs_rq *cfs_rq)
 	if (entity_is_task(curr)) {
 		struct task_struct *curtask = task_of(curr);
 
-		trace_sched_stat_runtime(curtask, delta_exec, curr->vruntime);
+		//trace_sched_stat_runtime(curtask, delta_exec, curr->vruntime);
 		cgroup_account_cputime(curtask, delta_exec);
 		account_group_exec_runtime(curtask, delta_exec);
 	}
@@ -9922,7 +9922,8 @@ static void attach_task_cfs_rq(struct task_struct *p)
 	attach_entity_cfs_rq(se);
 
 	if (!vruntime_normalized(p))
-		se->vruntime += cfs_rq->min_vruntime;
+		//se->vruntime += cfs_rq->min_vruntime; //Retirado
+		se->burst_time += cfs_rq->min_burst_time;
 }
 
 static void switched_from_fair(struct rq *rq, struct task_struct *p)
@@ -9968,9 +9969,11 @@ static void set_curr_task_fair(struct rq *rq)
 void init_cfs_rq(struct cfs_rq *cfs_rq)
 {
 	cfs_rq->tasks_timeline = RB_ROOT_CACHED;
-	cfs_rq->min_vruntime = (u64)(-(1LL << 20));
+		//cfs_rq->min_vruntime = (u64)(-(1LL << 20)); //Retirado
+		cfs_rq->min_burst_time = (u64)(-(1LL << 20));
 #ifndef CONFIG_64BIT
-	cfs_rq->min_vruntime_copy = cfs_rq->min_vruntime;
+	//cfs_rq->min_vruntime_copy = cfs_rq->min_vruntime; //Retirado
+	cfs_rq->min_burst_time_copy = cfs_rq->min_burst_time;
 #endif
 #ifdef CONFIG_SMP
 	raw_spin_lock_init(&cfs_rq->removed.lock);
