@@ -4084,7 +4084,7 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr) //Nao faz n
 	 * Ensure that a task that missed wakeup preemption by a
 	 * narrow margin doesn't have to wait for a full slice.
 	 * This also mitigates buddy induced latencies under load.
-	 */
+	 *//*
 	if (delta_exec < sysctl_sched_min_granularity)
 		return;
 
@@ -4097,7 +4097,7 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr) //Nao faz n
 	//if (delta > ideal_runtime)
 		//resched_curr(rq_of(cfs_rq));
 }
-
+*/
 static void
 set_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
@@ -6559,6 +6559,7 @@ static int
 wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se) //Olhar com cuidado
 {
 	//s64 gran, vdiff = curr->vruntime - se->vruntime; //Retirado
+	/*
 	s64 gran, vdiff = curr->burst_time - se->burst_time;
 
 	if (vdiff <= 0)
@@ -6567,7 +6568,7 @@ wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se) //Olha
 	//gran = wakeup_gran(se);
 	if (vdiff > gran)
 		return 1;
-
+*/
 	return 0;
 }
 
@@ -6664,7 +6665,7 @@ static void check_preempt_wakeup(struct rq *rq, struct task_struct *p, int wake_
 		 */
 		if (!next_buddy_marked)
 			set_next_buddy(pse);
-		goto preempt;
+		//goto preempt; //So preemption quando for a idle
 	}
 
 	return;
@@ -9805,12 +9806,12 @@ prio_changed_fair(struct rq *rq, struct task_struct *p, int oldprio)
 	 * Reschedule if we are currently running on this runqueue and
 	 * our priority decreased, or if we are not currently running on
 	 * this runqueue and our priority is higher than the current's
-	 */
+	 *//* //Nao preempt
 	if (rq->curr == p) {
 		if (p->prio > oldprio)
 			resched_curr(rq);
 	} else
-		check_preempt_curr(rq, p, 0);
+		check_preempt_curr(rq, p, 0);*/
 }
 
 static inline bool vruntime_normalized(struct task_struct *p)
@@ -9941,9 +9942,9 @@ static void switched_to_fair(struct rq *rq, struct task_struct *p)
 		 * kick off the schedule if running, otherwise just see
 		 * if we can still preempt the current task.
 		 */
-		if (rq->curr == p)
-			resched_curr(rq);
-		else
+		//if (rq->curr == p)
+			//resched_curr(rq);
+		//else
 			check_preempt_curr(rq, p, 0);
 	}
 }
