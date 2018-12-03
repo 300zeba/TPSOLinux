@@ -876,10 +876,6 @@ static void update_curr(struct cfs_rq *cfs_rq)//Importantao
 	//curr->vruntime += calc_delta_fair(delta_exec, curr); //Retirado
 	//update_min_vruntime(cfs_rq); //Retirado
 
-	curr->burst_time = task_of(curr)->burst_time;
-	update_min_burst_time(cfs_rq);
-
-
 	if (entity_is_task(curr)) {
 		struct task_struct *curtask = task_of(curr);
 
@@ -6693,6 +6689,28 @@ preempt:
 		set_last_buddy(se);
 }
 
+static void
+update_curr_burst_time(struct cfs_rq *cfs_rq)//Importantaco
+{
+	struct sched_entity *curr = cfs_rq->curr;
+	u64 now = rq_clock_task(rq_of(cfs_rq));
+	u64 delta_exec;
+
+	if (unlikely(!curr))
+		return;
+
+	delta_exec = now - curr->exec_start_b;
+	if (unlikely((s64)delta_exec <= 0))
+		return;
+
+	curr->exec_start_b = now;
+
+
+	curr->burst_time = (curr->burst_time + delta_exec)>>1;
+	update_min_burst_time(cfs_rq);
+
+}
+
 static struct task_struct *
 pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 {
@@ -6730,6 +6748,7 @@ again:
 			//printk
 			if (curr->on_rq)
 				update_curr(cfs_rq);
+				update_curr_burst_time(cfs_rq);
 			else
 				curr = NULL;
 
@@ -6777,6 +6796,7 @@ again:
 			}
 		}
 //printk
+
 		put_prev_entity(cfs_rq, pse);
 		set_next_entity(cfs_rq, se);
 	}

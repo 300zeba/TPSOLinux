@@ -3413,11 +3413,6 @@ static void __sched notrace __schedule(bool preempt)
 	 */
 	rq_lock(rq, &rf);
 	smp_mb__after_spinlock();
-	//Alteracao
-	prev->burst_time = (100*((prev->utime - prev->last_utime) + prev->burst_time))>>1;
-	prev->last_utime = prev->utime;
-	//Fim
-
 
 	/* Promote REQ to ACT */
 	rq->clock_update_flags <<= 1;
