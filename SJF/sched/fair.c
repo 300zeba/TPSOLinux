@@ -6747,8 +6747,10 @@ again:
 		if (curr) {
 			//printk
 			if (curr->on_rq){
+				//printk(KERN_DEBUG "CurrPid=%d-BurstBefore=%llu",task_of(curr)->pid,curr->burst_time);
 				update_curr(cfs_rq);
 				update_curr_burst_time(cfs_rq);
+				//printk(KERN_DEBUG "CurrPid=%d-BurstAfter=%llu",task_of(curr)->pid,curr->burst_time);
 			}
 			else{
 				curr = NULL;
@@ -6775,7 +6777,7 @@ again:
 	} while (cfs_rq);
 
 	p = task_of(se);
-
+	//printk(KERN_DEBUG "NextPid=%d-Burst=%llu",p->pid,se->burst_time);
 	/*
 	 * Since we haven't yet done put_prev_entity and if the selected task
 	 * is a different task than we started out with, try and touch the
