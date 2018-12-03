@@ -1,0 +1,5 @@
+cd linux-4.19.6/
+START_TIME=$SECONDS
+make
+ELAPSED_TIME=$(($SECONDS - $START_TIME))
+echo Tempo gasto = $ELAPSED_TIME

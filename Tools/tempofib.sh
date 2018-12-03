@@ -1,0 +1,5 @@
+
+START_TIME=$SECONDS
+./fib
+ELAPSED_TIME=$(($SECONDS - $START_TIME))
+echo Tempo gasto = $ELAPSED_TIME

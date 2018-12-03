@@ -1,0 +1,4 @@
+START_TIME=$SECONDS
+./loop
+ELAPSED_TIME=$(($SECONDS - $START_TIME))
+echo Tempo gasto = $ELAPSED_TIME
