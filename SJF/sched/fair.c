@@ -6700,6 +6700,7 @@ update_curr_burst_time(struct cfs_rq *cfs_rq)//Importantaco
 		return;
 
 	delta_exec = now - curr->exec_start_b;
+
 	if (unlikely((s64)delta_exec <= 0))
 		return;
 
@@ -6746,12 +6747,13 @@ again:
 		 */
 		if (curr) {
 			//printk
-			if (curr->on_rq)
+			if (curr->on_rq){
 				update_curr(cfs_rq);
 				update_curr_burst_time(cfs_rq);
-			else
+			}
+			else{
 				curr = NULL;
-
+			}
 			/*
 			 * This call to check_cfs_rq_runtime() will do the
 			 * throttle and dequeue its entity in the parent(s).
