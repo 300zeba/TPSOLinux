@@ -6703,7 +6703,6 @@ update_curr_burst_time(struct cfs_rq *cfs_rq)//Importantaco
 	if (unlikely((s64)delta_exec <= 0))
 		return;
 
-	curr->exec_start_b = now;
 
 
 	curr->burst_time = (curr->burst_time + delta_exec)>>1;
@@ -6718,6 +6717,7 @@ pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf
 	struct sched_entity *se;
 	struct task_struct *p;
 	int new_tasks;
+	u64 now = rq_clock_task(rq_of(cfs_rq));
 
 again:
 	if (!cfs_rq->nr_running)
@@ -6800,7 +6800,7 @@ again:
 			}
 		}
 //printk
-
+		se->exec_start_b = now;
 		put_prev_entity(cfs_rq, pse);
 		set_next_entity(cfs_rq, se);
 	}
