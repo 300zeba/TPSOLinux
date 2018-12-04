@@ -6641,7 +6641,8 @@ static void check_preempt_wakeup(struct rq *rq, struct task_struct *p, int wake_
 		 */
 		if (!next_buddy_marked)
 			set_next_buddy(pse);
-			goto preempt; 
+		
+		goto preempt; 
 	}
 
 	return;
